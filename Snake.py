@@ -47,12 +47,11 @@ fps_controller = pygame.time.Clock()
 
 
 def get_pos(x, y, grid_size):
-
     return [x*grid_size  , y*grid_size ]
     
 
 
-grid_size = 10
+grid_size = 30
 # Game variables
 
 snake_pos = get_pos(10,5,grid_size)
@@ -155,6 +154,8 @@ while True:
         snake_body.pop()
 
     # Spawning food on the screen
+
+    # FIX THIS
     if not food_spawn:
         food_pos = [random.randrange(1, (frame_size_x//grid_size)) * grid_size, random.randrange(1, (frame_size_y//grid_size)) * grid_size]
     food_spawn = True

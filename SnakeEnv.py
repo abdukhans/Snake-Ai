@@ -199,11 +199,6 @@ class SnakeEnv():
         return (reward,game_Over)
 
 
-    
-
-    def getState():
-        pass
-
 
     def checkIsOver(self):
         

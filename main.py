@@ -1,7 +1,7 @@
 from SnakeEnv import SnakeEnv
 from Agent import Agent
 from RepalyMemory import ReplayMemory
-NUM_EPSIODES = 500
+NUM_EPSIODES = 50
 
 BATCH_SIZE = 2
 memory = ReplayMemory(BATCH_SIZE)
@@ -21,10 +21,6 @@ for i in range(NUM_EPSIODES):
         state = AI.getGameState(env)
         action_idx = AI.SelectAction(state).int()
         action = action_dict[action_idx.item()]
-
-
-        #state = state.unsqueeze(0)
-
         
         reward, done = env.playMove(action)
         next_state = AI.getGameState(env)

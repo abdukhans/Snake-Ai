@@ -183,12 +183,12 @@ class SnakeEnv():
         
 
 
-
+        done = False
 
         if self.checkIsOver():
 
             reward = -10
-            self.done = True
+            done = True
             self.reset()
             
             
@@ -203,7 +203,7 @@ class SnakeEnv():
             reward = 1
             
 
-        return (torch.Tensor([reward]),torch.Tensor([self.done]))
+        return (torch.Tensor([reward]),torch.Tensor([done]))
 
 
 
@@ -229,7 +229,37 @@ class SnakeEnv():
         return False 
 
     def reset(self):
-        self.__init__(render=self.render_,epsiodeLen=self.epsiodeLen)
+        #self.__init__(render=self.render_,epsiodeLen=self.epsiodeLen)
+        # self.n_actions    = 4 
+        # self.frame_size_x = frame_x
+        # self.frame_size_y = frame_y
+        # self.render_      = render
+
+        # self.w  = np.array([self.frame_size_x//self.grid_size, self.frame_size_y//self.grid_size])
+        # self.difficulty =  difficulty
+
+        self.frame_iteration = 0
+        
+        #self.grid_size = grid_size
+
+
+
+        
+        #self.fps_controller = lambda : FPS_CONT.tick(difficulty)
+        #self.epsiodeLen = epsiodeLen
+        self.snake = np.array([self.get_pos(10,5), self.get_pos(10-1,5),self.get_pos(10-2,5)])
+        self.snake_pos = self.get_pos(10,5)
+        self.food_spawn = False
+        self.food_pos = self.genFood()
+
+        self.done = False
+        
+        self.score = 0
+        #self.isInitRender = False
+        self.gotFood = False
+        
+        self.dir = 'DOWN'
+
         
     def get_pos(self,x,y):
 

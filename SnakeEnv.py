@@ -4,7 +4,9 @@ Made with PyGame
 """
 
 import pygame, sys, time, random
+import torch
 import numpy as np
+
 
 
 BLACK = pygame.Color(0, 0, 0)
@@ -18,11 +20,15 @@ FPS_CONT = pygame.time.Clock()
 class SnakeEnv():    
 
     def __init__(self,render=False,grid_size=10,frame_x=720,
-    frame_y=480,difficulty = 10,epsiodeLen=100):
+    frame_y=480,difficulty = 1000,epsiodeLen=100):
 
+
+        self.n_actions    = 4 
         self.frame_size_x = frame_x
         self.frame_size_y = frame_y
         self.render_      = render
+
+        # self.w  = np.array([self.frame_size_x//self.grid_size, self.frame_size_y//self.grid_size])
         # self.difficulty =  difficulty
 
         self.frame_iteration = 0
@@ -38,6 +44,8 @@ class SnakeEnv():
         self.snake_pos = self.get_pos(10,5)
         self.food_spawn = False
         self.food_pos = self.genFood()
+
+        self.done = False
         
         self.score = 0
         self.isInitRender = False
@@ -173,7 +181,6 @@ class SnakeEnv():
         # Other wise it will just return the original food postion
 
         
-        game_Over = False
 
 
 
@@ -181,7 +188,7 @@ class SnakeEnv():
         if self.checkIsOver():
 
             reward = -10
-            game_Over = True
+            self.done = True
             self.reset()
             
             
@@ -196,17 +203,19 @@ class SnakeEnv():
             reward = 1
             
 
-        return (reward,game_Over)
+        return (torch.Tensor([reward]),torch.Tensor([self.done]))
+
 
 
 
     def checkIsOver(self):
-        
+
+
         if self.frame_iteration > self.epsiodeLen*(len(self.snake)):
             return True
-        if self.snake_pos[0] < 0 or self.snake_pos[0] > self.frame_size_x-10:
+        if self.snake_pos[0] < 0 or self.snake_pos[0] >= self.frame_size_x:
             return True
-        if self.snake_pos[1] < 0 or self.snake_pos[1] > self.frame_size_y-10:
+        if self.snake_pos[1] < 0 or self.snake_pos[1] >= self.frame_size_y:
             return True
 
         # if self.frame_iteration == self.epsiodeLen:
@@ -239,3 +248,17 @@ class SnakeEnv():
         self.food_spawn  = True
 
         return food_pos
+
+
+    def isCollision(self, snake_pos:np.ndarray):
+        x = snake_pos[0]
+        y = snake_pos[1]
+
+        if x >= self.frame_size_x or x < 0 :
+            return True  
+
+        if y >= self.frame_size_y or y < 0:
+            return True
+        
+
+        return False

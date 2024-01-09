@@ -11,7 +11,7 @@ EPS_START = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000
 TAU = 0.005
-LR = 1e-4
+LR = 0.5
 BATCH_SIZE = 10_000
 
 
@@ -23,7 +23,7 @@ class Agent:
         self.model = DQN(n_obsv,n_actions)
         self.batch_size = batch_size
 
-        self.trainer = QTrainer(self.model,replayMemory,n_actions,n_obsv,batch_size=self.batch_size)
+        self.trainer = QTrainer(self.model,replayMemory,n_actions,n_obsv,batch_size=self.batch_size,lr=0.5)
 
         self.eps_start = eps_start
         self.eps_end   = eps_end
@@ -39,7 +39,7 @@ class Agent:
 
         if game.done:
 
-            return None
+            return [0]*12
     
         snake_pos = game.snake_pos
         grid_size = game.grid_size
@@ -102,11 +102,12 @@ class Agent:
             with torch.no_grad():
                 # Note the shape of self.model(state) should be (4,)
 
-                # NOTE: THIS RETURNS A LongTensor (This might shoot us in the foot later on)
-                return torch.argmax(self.model(state),dim=0).unsqueeze(0)
+                # NOTE: THIS RETURNS A LongTensor (This might shoot us in the foot later on) that is a 2D array with
+                #       DIMS 1 by 1
+                return self.model(state).max(1).indices.view(1,1)
 
         else:
-            return torch.Tensor([random.randint(0,3)])
+            return torch.tensor([[random.randint(0,3)]],dtype=torch.long)
         
 
 

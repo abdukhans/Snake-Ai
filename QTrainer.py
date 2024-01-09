@@ -13,10 +13,14 @@ class QTrainer:
         self.lr = lr
         self.optimizer = optim.Adam(self.model.parameters(),lr=self.lr,amsgrad=True)
         self.targetModel = DQN(n_obs,n_actions)
+        self.targetModel.load_state_dict(self.model.state_dict())
+
 
         self.batch_size = batch_size
         self.memory = memory
         self.discount = discount 
+
+        self.loss = None
 
 
         pass
@@ -41,13 +45,11 @@ class QTrainer:
         mask_non_final_next = torch.Tensor([s is not None for s in next_state ]).bool()
 
 
-        non_final_next_states = torch.cat([s for s in next_state if s is not None]).view(self.batch_size,-1)
+        non_final_next_states = torch.cat([s for s in next_state if s is not None])
 
 
-        state = torch.cat(state).view(self.batch_size,-1)
-        
-
-        action = torch.cat(action).type(torch.LongTensor).unsqueeze(0)
+        state = torch.cat(state)
+        action = torch.cat(action)
         reward = torch.cat(reward)
 
         # print(action)
@@ -61,6 +63,11 @@ class QTrainer:
 
         expected_qsa = torch.zeros(self.batch_size)
         with torch.no_grad():
+
+
+            #print(len(non_final_next_states),len(reward))
+
+
             expected_qsa[mask_non_final_next]:torch.Tensor= reward +  self.discount*(self.targetModel(non_final_next_states).max(1).values)
  
 
@@ -71,7 +78,7 @@ class QTrainer:
         
         
         loss = cirterion(qsa_current,expected_qsa)
-
+            
         
 
         self.optimizer.zero_grad()

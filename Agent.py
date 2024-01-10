@@ -17,13 +17,14 @@ BATCH_SIZE = 10_000
 
 class Agent:
     def __init__(self,n_obsv:int,n_actions:int,replayMemory:ReplayMemory,eps_start=EPS_START,
-                eps_end=EPS_END, eps_decay=EPS_DECAY,batch_size=BATCH_SIZE):
+                eps_end=EPS_END, eps_decay=EPS_DECAY,batch_size=BATCH_SIZE,lr=0.5):
 
         # This takes a vector of szie 11 and outputs a vector of size 4
         self.model = DQN(n_obsv,n_actions)
         self.batch_size = batch_size
+        self.lr = lr
 
-        self.trainer = QTrainer(self.model,replayMemory,n_actions,n_obsv,batch_size=self.batch_size,lr=0.5)
+        self.trainer = QTrainer(self.model,replayMemory,n_actions,n_obsv,batch_size=self.batch_size,lr=self.lr)
 
         self.eps_start = eps_start
         self.eps_end   = eps_end
@@ -114,7 +115,7 @@ class Agent:
 
     def optimize(self):
 
-        self.trainer.optimize()
+        return self.trainer.optimize()
 
     def pushRPM(self,state,action,next_state,reward):
 

@@ -1,6 +1,7 @@
 from SnakeEnv import SnakeEnv
 from Agent import Agent
 from RepalyMemory import ReplayMemory
+
 NUM_EPSIODES = 500
 TAU = 0.005
 BATCH_SIZE = 100
@@ -10,6 +11,12 @@ env = SnakeEnv(render=True)
 
 action_dict = {0:"UP",1:"DOWN",2:"RIGHT",3:"LEFT"}
 
+
+eps_iter = list(range(NUM_EPSIODES)) 
+loss_val = [0]*NUM_EPSIODES
+
+
+
 for i in range(NUM_EPSIODES): 
 
 
@@ -17,6 +24,7 @@ for i in range(NUM_EPSIODES):
     done = False
 
     print(i)
+
     while not(done):
 
         state = AI.getGameState(env).unsqueeze(0) # [[_,_,....,_]] <--- state tensor is a 2D array with containing
@@ -35,7 +43,7 @@ for i in range(NUM_EPSIODES):
 
         memory.push(state,action_idx,next_state,reward)    
 
-        AI.optimize()
+        loss_val[i] = AI.optimize()
 
 
         

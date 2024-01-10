@@ -28,7 +28,7 @@ class QTrainer:
 
     def optimize(self):
         if len(self.memory) < self.batch_size:
-            return
+            return -1
 
 
         # print("OPTIM")
@@ -78,7 +78,11 @@ class QTrainer:
         
         
         loss = cirterion(qsa_current,expected_qsa)
-            
+
+
+        loss_val = loss.item()
+
+        #print("LOSS: " , loss.item())
         
 
         self.optimizer.zero_grad()
@@ -86,11 +90,9 @@ class QTrainer:
         torch.nn.utils.clip_grad_value_(self.model.parameters(), 100)
         self.optimizer.step()
 
-    
 
 
-
-        pass
+        return loss_val
     
     def push(self,state,action,next_state,reward):
 

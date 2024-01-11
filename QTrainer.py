@@ -5,6 +5,16 @@ import torch.nn.functional as F
 from DQN import DQN
 from RepalyMemory import ReplayMemory
 
+
+def allZeros(iter):
+
+    for i in iter[0]:
+        #print(i)
+        if i != 0 :
+            return False
+
+    return True
+
 class QTrainer:
 
     def __init__(self, model:DQN, memory:ReplayMemory,n_actions:int,n_obs:int,
@@ -42,7 +52,7 @@ class QTrainer:
         # print(reward)
 
         # This is the hides all final next_states 
-        mask_non_final_next = torch.Tensor([s is not None for s in next_state ]).bool()
+        mask_non_final_next = torch.Tensor([not(allZeros(s)) for s in next_state ]).bool()
 
 
         non_final_next_states = torch.cat([s for s in next_state if s is not None])
@@ -61,14 +71,14 @@ class QTrainer:
         # This variable captures all the Q(s,a) from the taken  state, action variables  
         qsa_current:torch.Tensor = self.model(state).gather(1,action)
 
-        expected_qsa = torch.zeros(self.batch_size)
+        next_state_values = torch.zeros(self.batch_size)
         with torch.no_grad():
 
 
             #print(len(non_final_next_states),len(reward))
 
 
-            expected_qsa[mask_non_final_next]:torch.Tensor= reward +  self.discount*(self.targetModel(non_final_next_states).max(1).values)
+            next_state_values[mask_non_final_next]:torch.Tensor = self.targetModel(non_final_next_states).max(1).values
  
 
 
@@ -76,8 +86,10 @@ class QTrainer:
 
         cirterion = nn.SmoothL1Loss()
         
+        expected_qsa = (next_state_values* self.discount) + reward
+
         
-        loss = cirterion(qsa_current,expected_qsa)
+        loss = cirterion(qsa_current,expected_qsa.unsqueeze(1))
 
 
         loss_val = loss.item()

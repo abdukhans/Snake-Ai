@@ -185,6 +185,7 @@ class SnakeEnv():
 
         done = False
 
+
         if self.checkIsOver():
 
             reward = -10

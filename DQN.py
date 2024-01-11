@@ -8,9 +8,9 @@ class DQN(nn.Module):
         self.relu_stack = nn.Sequential(
              nn.Linear(n_observations, 128),
              nn.ReLU(),
-             nn.Linear(128, 128),
+             nn.Linear(128, 256),
              nn.ReLU(),
-             nn.Linear(128,n_actions)
+             nn.Linear(256,n_actions)
         )
 
     def forward(self, x):

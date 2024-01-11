@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import torch
 
 GAMMA = 0.99
-NUM_EPSIODES = 50
+NUM_EPSIODES = 100
 TAU = 0.005
-BATCH_SIZE = 100
+BATCH_SIZE = 10
 memory = ReplayMemory(BATCH_SIZE)
-AI = Agent(12,4,memory,batch_size=BATCH_SIZE,lr=0.5)
+AI = Agent(12,4,memory,batch_size=BATCH_SIZE,lr=0.001)
 env = SnakeEnv(render=True)
 loss_val = [0]*NUM_EPSIODES
 
@@ -17,6 +17,7 @@ action_dict = {0:"UP",1:"DOWN",2:"RIGHT",3:"LEFT"}
 
 eps_dur = []
 exp_rew = []
+score_list = []
 
 
 def plot_dur_anim(avg_pool=100):
@@ -108,22 +109,38 @@ def plot_rewards():
 
 
 
+def plot_score(avg_pool=10):
+    plt.figure(4)
+
+    plt.title("Score vs Episode")
+
+
+    plt.xlabel("Epsiode")
+    plt.ylabel("Score")
+    
+
+    plt.plot(score_list)
+
+    if len(score_list) >= avg_pool:
+
+        means = torch.Tensor(score_list).unfold(0,avg_pool,1).mean(1)
+
+        plt.plot(list(range(avg_pool-1,NUM_EPSIODES)),means.numpy() ) 
+
+
+    plt.show()
+
 
 
 for i in range(NUM_EPSIODES): 
-
-
-    
     done = False
-
-
-
     sum_loss = 0 
 
     tot_time = 0
 
     discounted_tot_reward = 0 
 
+    score = 0 
     while not(done):
         tot_time += 1 
 
@@ -137,8 +154,15 @@ for i in range(NUM_EPSIODES):
         
         reward, done = env.playMove(action)
 
-        discounted_tot_reward  = reward + GAMMA*discounted_tot_reward
-        
+        discounted_tot_reward  = reward.item() + GAMMA*discounted_tot_reward
+
+        if reward.item() == 10:
+            score += 1
+
+
+
+
+
 
 
        
@@ -184,6 +208,7 @@ for i in range(NUM_EPSIODES):
 
 
             eps_dur.append(t+1) 
+            score_list.append(score)
 
 
 
@@ -196,7 +221,7 @@ for i in range(NUM_EPSIODES):
 
 
     if loss_val[i] != -1:
-        print(f"Epsiode #:{i}  Avg Loss: {loss_val[i]}")
+        print(f"Epsiode #:{i}  Avg Loss: {loss_val[i]:.4f} Exp Rewards: {discounted_tot_reward:.4f}")
 
 
 
@@ -205,17 +230,8 @@ for i in range(NUM_EPSIODES):
     memory.push(state,action_idx,next_state,reward)    
 
 
+plot_score()
 
-
-
-    
-    
-
-
-    pass
-
-
-
-plot_rewards()
+# plot_rewards()
 # plot_loss()
 # plot_dur()

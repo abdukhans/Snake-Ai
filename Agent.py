@@ -45,8 +45,8 @@ class Agent:
         snake_pos = game.snake_pos
         grid_size = game.grid_size
 
-        point_left  = snake_pos + np.array([grid_size,0])
-        point_right = snake_pos - np.array([grid_size,0])
+        point_left  = snake_pos - np.array([grid_size,0])
+        point_right = snake_pos + np.array([grid_size,0])
         point_down  = snake_pos + np.array([0,grid_size])
         point_up    = snake_pos - np.array([0,grid_size])
 
@@ -59,16 +59,16 @@ class Agent:
 
         state = [
             # Danger Right  
-            game.isCollision(point_right),
+            (dir_right and game.isCollision(point_right)),
 
             # Danger Left
-            game.isCollision(point_left),
+            (dir_left and game.isCollision(point_left)),
 
             # Danger Up
-            game.isCollision(point_up),
+            (dir_up and game.isCollision(point_up)),
 
             # Danger Down
-            game.isCollision(point_down),
+            (dir_down and game.isCollision(point_down)),
 
 
             # Move dir 

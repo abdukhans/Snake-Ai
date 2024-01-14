@@ -1,17 +1,47 @@
 from SnakeEnv import SnakeEnv
+from os.path import exists
+
+
 from Agent import Agent
 from RepalyMemory import ReplayMemory
 import matplotlib.pyplot as plt
 import torch
 
 GAMMA = 0.99
-NUM_EPSIODES = 100
+NUM_EPSIODES = 200
 TAU = 0.005
-BATCH_SIZE = 10
-memory = ReplayMemory(BATCH_SIZE)
-AI = Agent(12,4,memory,batch_size=BATCH_SIZE,lr=0.001)
-env = SnakeEnv(render=True)
+BATCH_SIZE = 1000
+MAX_MEMORY = 10_000
+memory = ReplayMemory(MAX_MEMORY)
+N_OBSV = 12
+N_ACTIONS = 4
+AI = Agent(N_OBSV,N_ACTIONS,memory,batch_size=BATCH_SIZE,lr=0.001)
+PATH = "Weights.txt"
+
+
+def isLoadable(state_dict_load,model_state_dict):
+    for key in state_dict_load:
+
+        if not(state_dict_load[key].size() == model_state_dict[key].size()):
+            return False
+        
+    return True
+    
+
+if exists(PATH):
+
+    dict_ = torch.load(PATH)
+
+
+    if isLoadable(dict_,AI.model.state_dict()):
+        AI.model.load_state_dict(dict_)
+    else:
+        print(f"Not correct size from {PATH} going to build a new model and save to {PATH}")
+
+env = SnakeEnv(render=True,grid_size=20,epsiodeLen=100)
 loss_val = [0]*NUM_EPSIODES
+
+
 
 action_dict = {0:"UP",1:"DOWN",2:"RIGHT",3:"LEFT"}
 
@@ -131,6 +161,25 @@ def plot_score(avg_pool=10):
     plt.show()
 
 
+def plot_score_anim(avg_pool = 10):
+    plt.figure(5)
+
+
+    plt.plot(score_list)
+
+    if len(score_list) >= avg_pool:
+
+        means = torch.Tensor(score_list).unfold(0,avg_pool,1).mean(1)
+
+        plt.plot(list(range(avg_pool-1,len(score_list))),means.numpy() ) 
+
+
+
+    plt.show(block=False)
+    plt.pause(0.0001)
+    plt.clf()
+
+
 
 for i in range(NUM_EPSIODES): 
     done = False
@@ -147,7 +196,7 @@ for i in range(NUM_EPSIODES):
         t = env.frame_iteration 
 
         state = AI.getGameState(env).unsqueeze(0) # [[_,_,....,_]] <--- state tensor is a 2D array with containing
-                                                  # one 1D array that has 11 entries  
+                                                  # one 1D array that has 12 entries  
 
         action_idx = AI.SelectAction(state)       # ACTION <-- tensor which is going to be 1 by 1 NOTE: THis is a long tensor
         action = action_dict[action_idx.item()]
@@ -210,6 +259,7 @@ for i in range(NUM_EPSIODES):
             eps_dur.append(t+1) 
             score_list.append(score)
 
+        env.render(AI.model.state_dict())
 
 
     if tot_time > 0 :
@@ -230,6 +280,7 @@ for i in range(NUM_EPSIODES):
     memory.push(state,action_idx,next_state,reward)    
 
 
+torch.save(AI.model.state_dict(), PATH)
 plot_score()
 
 # plot_rewards()

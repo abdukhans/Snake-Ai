@@ -40,11 +40,13 @@ class QTrainer:
         if len(self.memory) < self.batch_size:
             return -1
 
+        
+        sample = self.memory.sample(self.batch_size)
 
         # print("OPTIM")
 
 
-        state,action,next_state,reward =  zip(*self.memory.memory )
+        state,action,next_state,reward =  zip(*sample )
 
         # print(state)
         # print(action)
@@ -52,7 +54,7 @@ class QTrainer:
         # print(reward)
 
         # This is the hides all final next_states 
-        mask_non_final_next = torch.Tensor([not(allZeros(s)) for s in next_state ]).bool()
+        mask_non_final_next = torch.tensor([not(allZeros(s)) for s in next_state ],dtype = torch.bool)
 
 
         non_final_next_states = torch.cat([s for s in next_state if s is not None])
@@ -71,6 +73,9 @@ class QTrainer:
         # This variable captures all the Q(s,a) from the taken  state, action variables  
         qsa_current:torch.Tensor = self.model(state).gather(1,action)
 
+
+
+
         next_state_values = torch.zeros(self.batch_size)
         with torch.no_grad():
 
@@ -84,7 +89,7 @@ class QTrainer:
 
 
 
-        cirterion = nn.SmoothL1Loss()
+        cirterion = nn.MSELoss()
         
         expected_qsa = (next_state_values* self.discount) + reward
 

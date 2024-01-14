@@ -6,7 +6,7 @@ Made with PyGame
 import pygame, sys, time, random
 import torch
 import numpy as np
-
+from os.path import exists
 
 
 BLACK = pygame.Color(0, 0, 0)
@@ -14,7 +14,7 @@ WHITE = pygame.Color(255, 255, 255)
 RED  = pygame.Color(255, 0, 0)
 GREEN = pygame.Color(0, 255, 0)
 BLUE = pygame.Color(0, 0, 255)
-
+PATH = "Weights.txt"
 FPS_CONT = pygame.time.Clock()
 
 class SnakeEnv():    
@@ -58,7 +58,7 @@ class SnakeEnv():
 
         pass
 
-    def render(self):
+    def render(self,model=None):
 
         if self.render_:
             pass
@@ -81,6 +81,15 @@ class SnakeEnv():
             self.game_window = pygame.display.set_mode((self.frame_size_x, self.frame_size_y))
             
         self.game_window.fill(BLACK)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+
+                if model:
+                    torch.save(model,PATH)
+
+                pygame.quit()
+                sys.exit()
 
         # Draw snake bod
         for pos in self.snake:
@@ -201,7 +210,7 @@ class SnakeEnv():
             
 
         else:
-            reward = 1
+            reward = 0
             
 
         return (torch.Tensor([reward]),torch.Tensor([done]))

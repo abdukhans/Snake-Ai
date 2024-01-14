@@ -158,7 +158,7 @@ def plot_score(avg_pool=10):
         plt.plot(list(range(avg_pool-1,NUM_EPSIODES)),means.numpy() ) 
 
 
-    plt.show()
+    plt.savefig("ScoreVsEp")
 
 
 def plot_score_anim(avg_pool = 10):
